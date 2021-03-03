@@ -1,21 +1,20 @@
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class MainPage {
+public class MainPage extends Page {
 
-    public static final String TITLE = "Яндекс";
+    private static final String TITLE = "Яндекс";
 
-    public static final By MORE_MENU_LOCATOR = By.cssSelector("a[href*=\"yandex.ru/all\"]");
+    private static final By MORE_MENU_LOCATOR = By.cssSelector("a[href*=\"yandex.ru/all\"]");
 
-    public static final By TV_ONLINE_LOCATOR = By.xpath("/html/body/div[3]/div/ul/li[40]/a");
+    private static final By TV_ONLINE_LOCATOR = By.cssSelector("a[data-id*=\"tvonline\"]");
 
     private final WebDriver driver;
 
     public MainPage(WebDriver driver) {
+        super(driver);
         this.driver = driver;
 
         new WebDriverWait(driver, 15).until(
@@ -26,11 +25,17 @@ public class MainPage {
         }
     }
 
-    public WebElement waitMorePopUpAppearForElementByLocator(By locator){
-        return new WebDriverWait(driver,15).until(ExpectedConditions.presenceOfElementLocated(locator));
+    public MainPage openMoreMenu() {
+        driver.findElement(MORE_MENU_LOCATOR).click();
+        return new MainPage(driver);
     }
 
-    public void waitElementToAppear(WebElement element){
-
+    public TVOnlinePage openTVOnlineThroughMoreMenu(){
+        openMoreMenu();
+        driver.findElement(TV_ONLINE_LOCATOR).click();
+        switchToTab(1);
+        return new TVOnlinePage(driver);
     }
+
+
 }

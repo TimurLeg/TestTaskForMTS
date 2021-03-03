@@ -2,17 +2,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 
@@ -24,48 +15,52 @@ public class MTSTest {
     public void setUp() {
         driver = new ChromeDriver();
         driver.get("https://yandex.ru/");
+        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
         driver.manage().window().maximize();
     }
 
     @After
     public void tearDown() {
         driver.close();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.quit();
     }
 
     @Test
     public void mainTest() {
-        //Ожидаем кнопку "еще"
-        //TODO вынести в мейн пейдж
-        WebElement moreButton = new WebDriverWait(driver, 15)
-                .until(ExpectedConditions.presenceOfElementLocated(MainPage.MORE_MENU_LOCATOR));
+        PurchasesPage purchasesPage = new MainPage(driver)
+                .openTVOnlineThroughMoreMenu()
+                .openPurchasesPage();
+        Assert.assertEquals("Покупок пока нет", purchasesPage.getEmptyScreenTitleText());
+        Assert.assertEquals("Покупайте и смотрите новинки не выходя из дома", purchasesPage.getEmptyScreenSubtitleText());
+    }
 
-        moreButton.click();
-        MainPage mainPage = new MainPage(driver);
-        WebElement tvOnlineButton = mainPage.waitMorePopUpAppearForElementByLocator(MainPage.TV_ONLINE_LOCATOR);
-        tvOnlineButton.click();
+    @Test
+    public void secondTest() {
+        FilmMenuPage filmMenuPagePage = new MainPage(driver)
+                .openTVOnlineThroughMoreMenu()
+                .openFilmPageFromLeftMenu();
+        String url = filmMenuPagePage.getFilmUrl(1,2);
+        String response = Helpers.getResponseFromURLAsString(url, "GET");
+        String year = Helpers.getReleaseYearFromSting(response);
+        String age = Helpers.getRestrictionAgeFromSting(response);
+        FilmPage filmPage = filmMenuPagePage.clickOnAFilm(1,2);
+        String pageYear = filmPage.getFilmYear();
+        String pageRestrictionAge = filmPage.getRestrictionAge();
+        Assert.assertEquals(year, pageYear);
+        Assert.assertEquals(age, pageRestrictionAge);
+        filmPage.fullScreen();
+        Assert.assertTrue(filmPage.verifyFilmStart());
+    }
 
-        ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
-        driver.switchTo().window(tabs.get(1));
-
-        TVOnlinePage tvOnlinePage = new TVOnlinePage(driver);
-        WebElement purchasesButton = driver.findElement(TVOnlinePage.PURCHASES);
-        purchasesButton.click();
-
-        PurchasesPage purchasesPage = new PurchasesPage(driver);
-
-        WebElement emptyScreenTitle = driver.findElement(PurchasesPage.EMPTY_SCREEN_TITLE);
-        WebElement emptyScreenSubtitle = driver.findElement(PurchasesPage.EMPTY_SCREEN_SUBTITLE);
-
-        Assert.assertTrue(emptyScreenTitle.getText().equals("Покупок пока нет"));
-        Assert.assertTrue(emptyScreenSubtitle.getText().equals("Покупайте и смотрите новинки не выходя из дома"));
-
-
-       /* WebElement title = new WebDriverWait(driver, 10)
-                .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("a[href*=\"all\"]")));
-        WebElement moreButton = driver.findElement(By.cssSelector("a[href*="all"]"));
-        moreButton.click();
-        Thread.sleep(5000);*/
+    @Test
+    public void thirdTest() {
+        TVOnlinePage tvOnlinePage = new MainPage(driver)
+                .openTVOnlineThroughMoreMenu()
+                .openFilmPageFromLeftMenu()
+                .searchFor("Апгрейд")
+                .waitMetadataToLoadbyRating();
+        Assert.assertTrue(tvOnlinePage.checkVideoPresented("Апгрейд"));
+        Assert.assertEquals("2018 • фантастика, боевик, триллер, детектив, криминал", tvOnlinePage.getVidoDiscriptionByTitle("Апгрейд"));
     }
 
 }
