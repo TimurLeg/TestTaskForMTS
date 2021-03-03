@@ -4,9 +4,20 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Methods that help perform the tests.
+ */
 public class Helpers {
 
-    public static String getResponseFromURLAsString(String urlString, String method) {
+
+    /**
+     * Gets response from target url as raw string.
+     *
+     * @param urlString target url.
+     * @param method    ex: "GET", "POST", "DELETE".
+     * @return
+     */
+    public static String getResponseFromURL(String urlString, String method) {
         StringBuilder inline = new StringBuilder();
         try {
             URL url = new URL(urlString);
@@ -24,24 +35,33 @@ public class Helpers {
                 }
                 sc.close();
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return inline.toString();
     }
 
-    public static String getReleaseYearFromSting(String response){
+    /**
+     * Trying to find film release year in raw data.
+     *
+     * @param response with raw data.
+     */
+    public static String getReleaseYearFromSting(String response) {
         String releaseYearRegex = "(?<=\"release_year\\\\\":)([\\s\\S]+?)(?=,)";
-        return getFirstMatchByRegex(response,releaseYearRegex);
+        return getFirstMatchByRegex(response, releaseYearRegex);
     }
 
-    public static String getRestrictionAgeFromSting(String response){
+    /**
+     * Trying to find film restriction age in raw data.
+     *
+     * @param response with raw data.
+     */
+    public static String getRestrictionAgeFromSting(String response) {
         String restrictionAgeRegex = "(?<=\"restriction_age\\\\\":)([\\s\\S]+?)(?=,)";
-        return getFirstMatchByRegex(response,restrictionAgeRegex);
+        return getFirstMatchByRegex(response, restrictionAgeRegex);
     }
 
-    private static String getFirstMatchByRegex(String text, String regex){
+    private static String getFirstMatchByRegex(String text, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
         if (matcher.find())

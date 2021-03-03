@@ -40,7 +40,7 @@ public class MTSTest {
                 .openTVOnlineThroughMoreMenu()
                 .openFilmPageFromLeftMenu();
         String url = filmMenuPagePage.getFilmUrl(1,2);
-        String response = Helpers.getResponseFromURLAsString(url, "GET");
+        String response = Helpers.getResponseFromURL(url, "GET");
         String year = Helpers.getReleaseYearFromSting(response);
         String age = Helpers.getRestrictionAgeFromSting(response);
         FilmPage filmPage = filmMenuPagePage.clickOnAFilm(1,2);
