@@ -26,7 +26,7 @@ public class MTSTest {
     }
 
     @Test
-    public void mainTest() {
+    public void firstTest() {
         PurchasesPage purchasesPage = new MainPage(driver)
                 .openTVOnlineThroughMoreMenu()
                 .openPurchasesPage();
